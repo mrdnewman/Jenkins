@@ -1,1 +1,22 @@
+pipeline {
 
+  agent any
+
+  stages {
+    stage('Docker Build') {
+      agent any
+      steps {
+        sh "docker build -t mrdnewman/myhub-demo:webserv.${BUILD_NUMBER} ."
+      }
+    }
+    stage('Docker Push') {
+      agent any
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+          sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
+          sh "docker push mrdnewman/myhub-demo:webserv.'${BUILD_NUMBER}'"
+        }
+      }
+    }
+  }
+}
