@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Set Terraform Path') {
+           steps {
+             script {
+               def tfHome = tool name: 'Terraform'
+               env.PATH = "${tfHome}:${env.PATH}"
+             }
+               sh '''
+
+                    terraform --version
+
+               '''
+           }
+        }
+
+        stage('Provision Infrastructure') {
+            steps {
+
+               withAWS(region:'us-east-2',credentials:'credentials-ID')
+               {
+                   sh '''
+
+                        terraform init
+                        terraform destroy -auto-approve
+
+                   '''
+                   // terraform destroy -auto-approve
+                   // terraform plan -out=plan-devdn.sd3
+                   // terraform apply plan-devdn.sd3
+               }
+             }
+          }
+       }
+    }
